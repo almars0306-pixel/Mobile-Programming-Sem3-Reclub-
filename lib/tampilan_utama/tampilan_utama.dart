@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
+import 'login.dart';
+import 'signup.dart';
+
 class _OnboardSlide {
   final IconData icon;
   final String title;
@@ -36,14 +39,14 @@ const List<_OnboardSlide> _slides = [
   ),
 ];
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class OnboardingPage extends StatefulWidget {
+  const OnboardingPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<OnboardingPage> createState() => _OnboardingPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -167,7 +170,12 @@ class _LoginPageState extends State<LoginPage> {
                           height: 56,
                           child: ElevatedButton(
                             onPressed: () {
-                              // TODO: aksi sign up / pindah ke halaman register
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SignupPage(),
+                                ),
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF3B2FE0),
@@ -209,7 +217,12 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              // TODO: navigasi ke halaman login
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginPage(),
+                                ),
+                              );
                             },
                         ),
                       ],
