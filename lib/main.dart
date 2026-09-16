@@ -6,8 +6,6 @@ void main() {
   runApp(const MyApp());
 }
 
-// Supaya PageView / ListView bisa di-swipe pakai mouse drag juga
-// (default Flutter cuma dengar touch, jadi di Chrome kerasa "gabisa di-swipe").
 class AppScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
@@ -30,7 +28,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const LoginPage(),
+      home: const OnboardingPage(),
     );
   }
 }
