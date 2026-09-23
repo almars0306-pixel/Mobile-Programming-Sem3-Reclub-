@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'widgets/event_card.dart';
 import 'home_page.dart';
-import 'widgets/event_page.dart'; // Import halaman Event yang baru dibuat
+import 'widgets/event_page.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -13,31 +12,46 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
-  // urutan harus sama dengan urutan item di BottomNavigationBar
-  final List<Widget> _pages = const [
-    HomePage(),
-    EventPage(), // Mengganti placeholder dengan halaman Event asli
-    _PlaceholderPage(title: 'Club'),
-    _PlaceholderPage(title: 'Profil'),
+  // HANYA MENYISAKAN EVENT LARI DAN EVENT YANG NANTI DIBUAT USER
+  final List<Map<String, dynamic>> _sharedEvents = [
+    {
+      'title': 'EVENT LARI',
+      'location': 'Gelora Bung Karno',
+      'date': '24 Sep 2026',
+      'icon': Icons.directions_run,
+      'description': 'Lari santai sore hari bareng komunitas. Terbuka untuk umum!',
+      'creator_id': 'user_lain', // Milik orang lain (tidak bisa dihapus)
+    },
   ];
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> pages = [
+      HomePage(events: _sharedEvents),
+      EventPage(
+        events: _sharedEvents,
+        onEventChanged: (updatedList) {
+          setState(() {
+            // Memperbarui UI secara real-time saat ada event yang ditambah/dihapus
+          });
+        },
+      ),
+      const _PlaceholderPage(title: 'Club'),
+      const _PlaceholderPage(title: 'Profil'),
+    ];
+
     return Scaffold(
-      // IndexedStack biar state tiap tab gak hilang pas pindah tab
       body: IndexedStack(
         index: _selectedIndex,
-        children: _pages,
+        children: pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: _onTabTapped,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF3B2FE0),
         unselectedItemColor: Colors.grey,
@@ -68,10 +82,8 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
-// Halaman sementara buat tab yang belum dibuat
 class _PlaceholderPage extends StatelessWidget {
   final String title;
-
   const _PlaceholderPage({required this.title});
 
   @override

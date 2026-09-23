@@ -4,49 +4,6 @@ import 'widgets/app_search_bar.dart';
 import 'widgets/event_card.dart';
 import 'widgets/section_header.dart';
 
-// Data sementara buat ngisi tampilan home.
-// Nanti diganti pakai model + dummy data dari lib/data.
-class _EventItem {
-  final String title;
-  final String location;
-  final String date;
-  final IconData icon;
-
-  const _EventItem({
-    required this.title,
-    required this.location,
-    required this.date,
-    required this.icon,
-  });
-}
-
-const List<_EventItem> _eventMingguIni = [
-  _EventItem(
-    title: 'Fun Futsal Sabtu',
-    location: 'GOR Tanjung Duren',
-    date: 'Sab, 20 Sep',
-    icon: Icons.sports_soccer,
-  ),
-  _EventItem(
-    title: 'Badminton Bareng',
-    location: 'Hall Grogol',
-    date: 'Min, 21 Sep',
-    icon: Icons.sports_tennis,
-  ),
-  _EventItem(
-    title: 'Morning Run 5K',
-    location: 'GBK Senayan',
-    date: 'Min, 21 Sep',
-    icon: Icons.directions_run,
-  ),
-  _EventItem(
-    title: 'Basket 3 on 3',
-    location: 'Lapangan Untar',
-    date: 'Sel, 23 Sep',
-    icon: Icons.sports_basketball,
-  ),
-];
-
 const List<String> _kategori = [
   'Semua',
   'Futsal',
@@ -57,7 +14,12 @@ const List<String> _kategori = [
 ];
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final List<Map<String, dynamic>> events; // Menerima data event dari MainShell
+
+  const HomePage({
+    super.key,
+    required this.events,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -164,14 +126,14 @@ class _HomePageState extends State<HomePage> {
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.only(left: 20),
-                  itemCount: _eventMingguIni.length,
+                  itemCount: widget.events.length, // Mengambil data dari MainShell
                   itemBuilder: (context, index) {
-                    final event = _eventMingguIni[index];
+                    final event = widget.events[index];
                     return EventCard(
-                      title: event.title,
-                      location: event.location,
-                      date: event.date,
-                      icon: event.icon,
+                      title: event['title'],
+                      location: event['location'],
+                      date: event['date'],
+                      icon: event['icon'],
                       onTap: () {
                         // TODO: buka detail event
                       },
@@ -184,7 +146,6 @@ class _HomePageState extends State<HomePage> {
               const SectionHeader(title: 'Club Populer'),
               const SizedBox(height: 12),
 
-              // sementara pakai ListTile biasa, nanti diganti ClubCard
               ...List.generate(3, (index) {
                 final nama = [
                   'Untar Futsal Club',
