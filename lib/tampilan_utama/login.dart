@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../auth_service.dart';
-import '../features/home/widgets/home_page.dart';
+
+import '../features/home/main_shell.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -145,9 +145,11 @@ class _LoginPageState extends State<LoginPage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const HomePage(),
+                          // Arahkan ke kerangka utama aplikasi Anda
+                          builder: (context) => const MainShell(), 
                         ),
                       );
+                    
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

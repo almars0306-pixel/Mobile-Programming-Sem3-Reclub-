@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'widgets/event_card.dart';
 import 'home_page.dart';
+import 'widgets/event_page.dart'; // Import halaman Event yang baru dibuat
 
-// Kerangka utama aplikasi setelah login.
-// Isinya bottom navigation bar + halaman sesuai tab yang dipilih.
-// Tab Event, Club, dan Profil masih placeholder, nanti diganti
-// sama halaman punya temen-temen yang lain.
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -19,7 +16,7 @@ class _MainShellState extends State<MainShell> {
   // urutan harus sama dengan urutan item di BottomNavigationBar
   final List<Widget> _pages = const [
     HomePage(),
-    _PlaceholderPage(title: 'Event'),
+    EventPage(), // Mengganti placeholder dengan halaman Event asli
     _PlaceholderPage(title: 'Club'),
     _PlaceholderPage(title: 'Profil'),
   ];

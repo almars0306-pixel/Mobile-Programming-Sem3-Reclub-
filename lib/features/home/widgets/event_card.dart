@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
-// Kartu event yang dipakai di list horizontal di home.
+// Kartu event yang dipakai di list
 class EventCard extends StatelessWidget {
   final String title;
   final String location;
   final String date;
   final IconData icon;
   final VoidCallback? onTap;
+  final double? width; 
+  final EdgeInsetsGeometry? margin; 
 
   const EventCard({
     super.key,
@@ -15,6 +17,8 @@ class EventCard extends StatelessWidget {
     required this.date,
     required this.icon,
     this.onTap,
+    this.width = 200, 
+    this.margin = const EdgeInsets.only(right: 16), 
   });
 
   @override
@@ -22,8 +26,8 @@ class EventCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 200,
-        margin: const EdgeInsets.only(right: 16),
+        width: width, 
+        margin: margin, 
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -38,9 +42,8 @@ class EventCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // bagian atas: ikon olahraga sebagai pengganti gambar
             Container(
-              height: 100,
+              height: 100, // Dikembalikan ke ukuran semula (100)
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: Color(0xFFF6A81C),
@@ -49,10 +52,10 @@ class EventCard extends StatelessWidget {
                   topRight: Radius.circular(20),
                 ),
               ),
-              child: Icon(icon, size: 48, color: Colors.white),
+              child: Icon(icon, size: 48, color: Colors.white), // Ukuran ikon disesuaikan
             ),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12), // Padding dikembalikan ke 12
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -61,37 +64,33 @@ class EventCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_outlined,
-                          size: 14, color: Colors.grey),
-                      const SizedBox(width: 4),
+                      const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           location,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today_outlined,
-                          size: 14, color: Colors.grey),
-                      const SizedBox(width: 4),
+                      const Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey),
+                      const SizedBox(width: 6),
                       Text(
                         date,
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
