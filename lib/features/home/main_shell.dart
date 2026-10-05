@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../theme/app_colors.dart';
 import 'home_page.dart';
 import 'widgets/event_page.dart';
 
@@ -45,35 +47,38 @@ class _MainShellState extends State<MainShell> {
         index: _selectedIndex,
         children: pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
+      // NavigationBar (Material 3) biar tampilannya lebih modern
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF3B2FE0),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
+        height: 68,
+        backgroundColor: Colors.white,
+        indicatorColor: AppColors.primarySoft,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        // warna ikon tab aktif ngikutin colorScheme.primary dari tema
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            selectedIcon: Icon(Icons.home_rounded),
             label: 'Beranda',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.event_outlined),
-            activeIcon: Icon(Icons.event),
+            selectedIcon: Icon(Icons.event_rounded),
             label: 'Event',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.groups_outlined),
-            activeIcon: Icon(Icons.groups),
+            selectedIcon: Icon(Icons.groups_rounded),
             label: 'Club',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
+            selectedIcon: Icon(Icons.person_rounded),
             label: 'Profil',
           ),
         ],
@@ -82,6 +87,7 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
+// Halaman sementara buat tab yang belum dibuat
 class _PlaceholderPage extends StatelessWidget {
   final String title;
   const _PlaceholderPage({required this.title});
@@ -89,15 +95,42 @@ class _PlaceholderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: const Color(0xFF3B2FE0),
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: AppColors.background,
       body: Center(
-        child: Text(
-          'Halaman $title belum dibuat',
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primarySoft,
+              ),
+              child: const Icon(
+                Icons.handyman_rounded,
+                size: 40,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Halaman $title',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Sedang dikerjakan teman kamu',
+              style: TextStyle(
+                fontSize: 13.5,
+                color: AppColors.textGrey,
+              ),
+            ),
+          ],
         ),
       ),
     );
