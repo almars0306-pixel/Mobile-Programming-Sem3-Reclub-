@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../theme/app_colors.dart';
+import 'event_controller.dart';
 import 'home_page.dart';
 import 'widgets/event_page.dart';
 
+/// Kerangka utama app setelah login.
+///
+/// - Tab bawah (Beranda, Event, Club, Profil) pakai IndexedStack
+///   biar posisi scroll dan isi tiap tab tidak hilang saat pindah tab.
+/// - Daftar event diambil dari EventController (state management),
+///   jadi beranda dan tab event selalu tampil data yang sama.
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -14,28 +22,34 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
-  // HANYA MENYISAKAN EVENT LARI DAN EVENT YANG NANTI DIBUAT USER
-  final List<Map<String, dynamic>> _sharedEvents = [
-    {
-      'title': 'EVENT LARI',
-      'location': 'Gelora Bung Karno',
-      'date': '24 Sep 2026',
-      'icon': Icons.directions_run,
-      'description': 'Lari santai sore hari bareng komunitas. Terbuka untuk umum!',
-      'creator_id': 'user_lain', // Milik orang lain (tidak bisa dihapus)
-    },
-  ];
+  // Pindah tab dari luar halaman (misal tombol "Lihat semua" di beranda).
+  void _pindahKeTabEvent() {
+    setState(() {
+      _selectedIndex = 1; // 1 = tab Event
+    });
+  }
+
+  void _pindahKeTabClub() {
+    setState(() {
+      _selectedIndex = 2; // 2 = tab Club
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final eventController = context.watch<EventController>();
+
     final List<Widget> pages = [
-      HomePage(events: _sharedEvents),
+      HomePage(
+        onOpenEvents: _pindahKeTabEvent,
+        onOpenClub: _pindahKeTabClub,
+      ),
       EventPage(
-        events: _sharedEvents,
+        events: eventController.events,
         onEventChanged: (updatedList) {
-          setState(() {
-            // Memperbarui UI secara real-time saat ada event yang ditambah/dihapus
-          });
+          // Simpan perubahan (tambah/hapus event) ke controller,
+          // otomatis tersimpan ke storage dan beranda ikut ter-update.
+          eventController.setEvents(updatedList);
         },
       ),
       const _PlaceholderPage(title: 'Club'),
