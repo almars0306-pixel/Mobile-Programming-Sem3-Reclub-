@@ -26,7 +26,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       scrollBehavior: AppScrollBehavior(),
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        // seed warna disamain sama warna brand Reclub biar konsisten
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF3B2FE0),
+        ),
       ),
       home: const OnboardingPage(),
     );
