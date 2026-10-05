@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../theme/app_colors.dart';
+import 'event_controller.dart';
 import 'widgets/app_search_bar.dart';
 import 'widgets/club_card.dart';
 import 'widgets/event_card.dart';
@@ -15,12 +18,20 @@ const List<String> _kategori = [
   'Voli',
 ];
 
+/// Beranda Reclub.
+///
+/// - Data event diambil langsung dari [EventController] lewat provider,
+///   jadi selalu sinkron dengan tab Event (state management).
+/// - [onOpenEvents] dipanggil saat user klik "Lihat semua" biar
+///   MainShell pindah ke tab Event.
+/// - Kategori yang terakhir dipilih user disimpan ke storage
+///   (shared_preferences) dan dibuka lagi saat app dijalankan.
 class HomePage extends StatefulWidget {
-  final List<Map<String, dynamic>> events; // Menerima data event dari MainShell
+  final VoidCallback onOpenEvents;
 
   const HomePage({
     super.key,
-    required this.events,
+    required this.onOpenEvents,
   });
 
   @override
@@ -28,8 +39,33 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  /// Key penyimpanan kategori terpilih di shared_preferences.
+  static const String _kategoriKey = 'reclub_kategori';
+
   int _kategoriTerpilih = 0;
   String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _muatKategoriTersimpan();
+  }
+
+  // Ambil kategori terakhir yang dipilih user dari storage.
+  Future<void> _muatKategoriTersimpan() async {
+    final prefs = await SharedPreferences.getInstance();
+    final tersimpan = prefs.getInt(_kategoriKey);
+    if (!mounted || tersimpan == null) return;
+    setState(() {
+      _kategoriTerpilih = tersimpan;
+    });
+  }
+
+  // Simpan kategori yang baru dipilih ke storage.
+  Future<void> _simpanKategori(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kategoriKey, index);
+  }
 
   // Nentuin kategori event dari ikonnya,
   // jadi gak perlu ubah struktur data event punya MainShell.
@@ -51,9 +87,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Event yang muncul = sesuai kategori + sesuai kata kunci pencarian
-  List<Map<String, dynamic>> get _filteredEvents {
+  List<Map<String, dynamic>> _filterEvents(List<Map<String, dynamic>> events) {
     final query = _query.toLowerCase();
-    return widget.events.where((event) {
+    return events.where((event) {
       final bool cocokKategori = _kategoriTerpilih == 0 ||
           _kategoriDariIcon(event['icon']) == _kategori[_kategoriTerpilih];
 
@@ -65,9 +101,117 @@ class _HomePageState extends State<HomePage> {
     }).toList();
   }
 
+  // Detail event muncul dari bawah layar (bottom sheet).
+  void _tampilkanDetailEvent(Map<String, dynamic> event) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 62,
+                    height: 62,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.primary, AppColors.primaryDark],
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Icon(event['icon'], color: Colors.white, size: 30),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          event['title'],
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${event['date']} • ${event['location']}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Deskripsi Event',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                event['description'],
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context); // tutup detail dulu
+                    widget.onOpenEvents(); // pindah ke tab Event
+                  },
+                  icon: const Icon(Icons.event_rounded, size: 20),
+                  label: const Text(
+                    'Kelola di Tab Event',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final events = _filteredEvents;
+    // watch: otomatis rebuild kalau ada event ditambah/dihapus
+    // dari tab Event, karena keduanya pakai EventController yang sama.
+    final events = _filterEvents(context.watch<EventController>().events);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -127,7 +271,12 @@ class _HomePageState extends State<HomePage> {
                     // tombol notifikasi dengan titik merah
                     GestureDetector(
                       onTap: () {
-                        // TODO: halaman notifikasi
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Belum ada notifikasi baru'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
                       },
                       child: Container(
                         width: 44,
@@ -186,6 +335,7 @@ class _HomePageState extends State<HomePage> {
                           setState(() {
                             _kategoriTerpilih = index;
                           });
+                          _simpanKategori(index);
                         },
                         selectedColor: AppColors.primary,
                         backgroundColor: Colors.white,
@@ -206,9 +356,7 @@ class _HomePageState extends State<HomePage> {
 
               SectionHeader(
                 title: 'Event Minggu Ini',
-                onSeeAll: () {
-                  // TODO: pindah ke tab Event
-                },
+                onSeeAll: widget.onOpenEvents,
               ),
               const SizedBox(height: 12),
 
@@ -228,9 +376,7 @@ class _HomePageState extends State<HomePage> {
                         location: event['location'],
                         date: event['date'],
                         icon: event['icon'],
-                        onTap: () {
-                          // TODO: buka detail event
-                        },
+                        onTap: () => _tampilkanDetailEvent(event),
                       );
                     },
                   ),
@@ -245,32 +391,37 @@ class _HomePageState extends State<HomePage> {
                 members: 128,
                 icon: Icons.sports_soccer_rounded,
                 avatarColors: const [AppColors.primary, AppColors.primaryDark],
-                onTap: () {
-                  // TODO: buka detail club
-                },
+                onTap: () => _infoClubBelumTersedia(),
               ),
               ClubCard(
                 name: 'Jakarta Runners',
                 members: 340,
                 icon: Icons.directions_run_rounded,
                 avatarColors: const [AppColors.accent, AppColors.accentDark],
-                onTap: () {
-                  // TODO: buka detail club
-                },
+                onTap: () => _infoClubBelumTersedia(),
               ),
               ClubCard(
                 name: 'Smash Badminton',
                 members: 76,
                 icon: Icons.sports_tennis_rounded,
                 avatarColors: const [Color(0xFF00B894), Color(0xFF00875F)],
-                onTap: () {
-                  // TODO: buka detail club
-                },
+                onTap: () => _infoClubBelumTersedia(),
               ),
               const SizedBox(height: 24),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // Sementara kasih info dulu, halaman detail club nanti dibuat
+  // oleh teman yang pegang bagian Club.
+  void _infoClubBelumTersedia() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Detail club akan tersedia segera'),
+        duration: Duration(seconds: 2),
       ),
     );
   }
