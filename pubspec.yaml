@@ -35,6 +35,14 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # State management resmi-nya Flutter biar data event bisa dibaca
+  # dari halaman mana pun tanpa oper-operan lewat konstruktor.
+  provider: ^6.1.2
+
+  # Simpan data event dan preferensi user ke storage device
+  # biar tidak hilang saat app ditutup.
+  shared_preferences: ^2.3.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
