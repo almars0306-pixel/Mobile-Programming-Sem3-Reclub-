@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../theme/app_colors.dart';
 import 'event_controller.dart';
+import 'notif_controller.dart';
+import 'notifications_page.dart';
 import 'widgets/app_search_bar.dart';
 import 'widgets/club_card.dart';
 import 'widgets/event_card.dart';
@@ -18,20 +20,46 @@ const List<String> _kategori = [
   'Voli',
 ];
 
+/// Daftar club yang ditampilkan di beranda (data contoh sementara,
+/// nanti diganti data dari bagian Club).
+const List<Map<String, dynamic>> _semuaClub = [
+  {
+    'name': 'Untar Futsal Club',
+    'members': 128,
+    'icon': Icons.sports_soccer_rounded,
+    'avatarColors': [AppColors.primary, AppColors.primaryDark],
+  },
+  {
+    'name': 'Jakarta Runners',
+    'members': 340,
+    'icon': Icons.directions_run_rounded,
+    'avatarColors': [AppColors.accent, AppColors.accentDark],
+  },
+  {
+    'name': 'Smash Badminton',
+    'members': 76,
+    'icon': Icons.sports_tennis_rounded,
+    'avatarColors': [Color(0xFF00B894), Color(0xFF00875F)],
+  },
+];
+
 /// Beranda Reclub.
 ///
 /// - Data event diambil langsung dari [EventController] lewat provider,
 ///   jadi selalu sinkron dengan tab Event (state management).
-/// - [onOpenEvents] dipanggil saat user klik "Lihat semua" biar
-///   MainShell pindah ke tab Event.
+/// - [onOpenEvents] dipanggil saat user klik "Lihat semua" pada bagian
+///   event, [onOpenClub] pada bagian club, biar MainShell pindah tab.
 /// - Kategori yang terakhir dipilih user disimpan ke storage
 ///   (shared_preferences) dan dibuka lagi saat app dijalankan.
+/// - Pencarian menyaring event dan club sekaligus.
 class HomePage extends StatefulWidget {
   final VoidCallback onOpenEvents;
+  final VoidCallback onOpenClub;
 
   const HomePage({
     super.key,
     required this.onOpenEvents,
+    required this.onOpenClub,
   });
 
   @override
@@ -99,6 +127,25 @@ class _HomePageState extends State<HomePage> {
 
       return cocokKategori && cocokQuery;
     }).toList();
+  }
+
+  // Club juga ikut disaring kata kunci pencarian.
+  List<Map<String, dynamic>> get _clubCocok {
+    final query = _query.toLowerCase();
+    if (query.isEmpty) return _semuaClub;
+    return _semuaClub
+        .where((club) =>
+            club['name'].toString().toLowerCase().contains(query) ||
+            club['members'].toString().contains(query))
+        .toList();
+  }
+
+  // Tarik ke bawah di beranda = muat ulang event dari storage.
+  Future<void> _muatUlangEvent() async {
+    // kasih jeda sekejap biar animasi refresh terlihat natural
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+    await context.read<EventController>().muatDariStorage();
   }
 
   // Detail event muncul dari bawah layar (bottom sheet).
@@ -207,16 +254,41 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _bukaNotifikasi() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const NotificationsPage()),
+    );
+  }
+
+  // Sementara kasih info dulu, halaman detail club nanti dibuat
+  // oleh teman yang pegang bagian Club.
+  void _infoClubBelumTersedia() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Detail club akan tersedia segera'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // watch: otomatis rebuild kalau ada event ditambah/dihapus
     // dari tab Event, karena keduanya pakai EventController yang sama.
     final events = _filterEvents(context.watch<EventController>().events);
+    final clubs = _clubCocok;
+    // Titik merah di lonceng hanya muncul kalau ada notifikasi belum dibaca.
+    final belumDibaca = context.watch<NotifController>().belumDibaca;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
+      body: RefreshIndicator(
+        onRefresh: _muatUlangEvent,
         child: SingleChildScrollView(
+          // harus selalu bisa discroll biar tarik-ke-bawah tetap jalan
+          // walau kontennya pendek
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -270,14 +342,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     // tombol notifikasi dengan titik merah
                     GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Belum ada notifikasi baru'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      },
+                      onTap: _bukaNotifikasi,
                       child: Container(
                         width: 44,
                         height: 44,
@@ -288,21 +353,25 @@ class _HomePageState extends State<HomePage> {
                             color: Colors.black.withValues(alpha: 0.05),
                           ),
                         ),
-                        child: const Stack(
+                        child: Stack(
                           clipBehavior: Clip.none,
                           children: [
-                            Center(
+                            const Center(
                               child: Icon(
                                 Icons.notifications_none_rounded,
                                 size: 24,
                                 color: AppColors.textDark,
                               ),
                             ),
-                            Positioned(
-                              top: 10,
-                              right: 11,
-                              child: _NotifDot(),
-                            ),
+                            if (belumDibaca > 0)
+                              Positioned(
+                                top: 10,
+                                right: 11,
+                                child: KeyedSubtree(
+                                  key: const ValueKey('notif_dot'),
+                                  child: const _NotifDot(),
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -383,45 +452,38 @@ class _HomePageState extends State<HomePage> {
                 ),
               const SizedBox(height: 24),
 
-              const SectionHeader(title: 'Club Populer'),
+              // Section club juga bisa "Lihat semua" ke tab Club.
+              SectionHeader(
+                title: 'Club Populer',
+                onSeeAll: widget.onOpenClub,
+              ),
               const SizedBox(height: 12),
 
-              ClubCard(
-                name: 'Untar Futsal Club',
-                members: 128,
-                icon: Icons.sports_soccer_rounded,
-                avatarColors: const [AppColors.primary, AppColors.primaryDark],
-                onTap: () => _infoClubBelumTersedia(),
-              ),
-              ClubCard(
-                name: 'Jakarta Runners',
-                members: 340,
-                icon: Icons.directions_run_rounded,
-                avatarColors: const [AppColors.accent, AppColors.accentDark],
-                onTap: () => _infoClubBelumTersedia(),
-              ),
-              ClubCard(
-                name: 'Smash Badminton',
-                members: 76,
-                icon: Icons.sports_tennis_rounded,
-                avatarColors: const [Color(0xFF00B894), Color(0xFF00875F)],
-                onTap: () => _infoClubBelumTersedia(),
-              ),
+              if (clubs.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    'Tidak ada club yang cocok dengan pencarian',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                )
+              else
+                ...clubs.map(
+                  (club) => ClubCard(
+                    name: club['name'],
+                    members: club['members'],
+                    icon: club['icon'],
+                    avatarColors: club['avatarColors'],
+                    onTap: _infoClubBelumTersedia,
+                  ),
+                ),
               const SizedBox(height: 24),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // Sementara kasih info dulu, halaman detail club nanti dibuat
-  // oleh teman yang pegang bagian Club.
-  void _infoClubBelumTersedia() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Detail club akan tersedia segera'),
-        duration: Duration(seconds: 2),
       ),
     );
   }

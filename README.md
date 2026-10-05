@@ -12,6 +12,8 @@ Ujian Tengah Semester mata kuliah *Mobile Programming* Semester 3.
   tanggal), hapus event milik sendiri. Event milik orang lain tidak bisa dihapus.
 - **Navigasi** — bottom navigation 4 tab (Beranda, Event, Club, Profil) dengan
   `IndexedStack` agar state tiap tab tidak hilang saat berpindah.
+- **Notifikasi** — halaman daftar notifikasi, tandai dibaca (satu per satu atau
+  semua), titik merah di beranda otomatis hilang saat sudah dibaca.
 - **Login & Onboarding** — halaman onboarding, login, dan sign up.
 
 ## Teknologi
@@ -35,6 +37,8 @@ lib/
     │   ├── main_shell.dart        #    Kerangka bottom navigation 4 tab
     │   ├── home_page.dart         #    Beranda: search, filter, club populer
     │   ├── event_controller.dart  #    State management + storage event
+    │   ├── notif_controller.dart  #    State notifikasi (ChangeNotifier)
+    │   ├── notifications_page.dart#    Halaman notifikasi
     │   └── widgets/               #    AppSearchBar, EventCard, ClubCard,
     │                              #    SectionHeader, EventPage
     └── (club/, profile/, data/    # [Dikerjakan anggota tim lain]
@@ -64,8 +68,9 @@ Untuk web: `flutter run -d chrome`
 flutter test
 ```
 
-Menjalankan unit test `EventController` (storage) dan widget test untuk
-`SectionHeader`, `ClubCard`, `EventCard`, dan `HomePage`.
+Menjalankan unit test `EventController` dan `NotifController` (storage &
+state) serta widget test untuk `SectionHeader`, `ClubCard`, `EventCard`,
+`HomePage`, dan `NotificationsPage`.
 
 Setiap push otomatis dijalankan `flutter analyze` + `flutter test` lewat
 GitHub Actions (lihat `.github/workflows/flutter.yml`).

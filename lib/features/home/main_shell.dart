@@ -29,12 +29,21 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
+  void _pindahKeTabClub() {
+    setState(() {
+      _selectedIndex = 2; // 2 = tab Club
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final eventController = context.watch<EventController>();
 
     final List<Widget> pages = [
-      HomePage(onOpenEvents: _pindahKeTabEvent),
+      HomePage(
+        onOpenEvents: _pindahKeTabEvent,
+        onOpenClub: _pindahKeTabClub,
+      ),
       EventPage(
         events: eventController.events,
         onEventChanged: (updatedList) {
