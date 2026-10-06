@@ -31,7 +31,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // background gradient biar nyambung sama halaman onboarding
+        width: double.infinity,
+        height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -201,7 +202,6 @@ class _LoginPageState extends State<LoginPage> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            // Arahkan ke kerangka utama aplikasi Anda
                             builder: (context) => const MainShell(),
                           ),
                         );
