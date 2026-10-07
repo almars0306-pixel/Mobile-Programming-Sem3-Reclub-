@@ -4,8 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'features/home/event_controller.dart';
 import 'features/home/notif_controller.dart';
-import 'tampilan_club/home_screen.dart';
-
+import 'tampilan_utama/tampilan_utama.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,8 +46,7 @@ class MyApp extends StatelessWidget {
             seedColor: const Color(0xFF3B2FE0),
           ),
         ),
-        // 2. Diubah ke ClubsHomeScreen agar tampilan baru langsung muncul
-        home: const ClubsHomeScreen(),
+        home: const OnboardingPage(),
       ),
     );
   }
