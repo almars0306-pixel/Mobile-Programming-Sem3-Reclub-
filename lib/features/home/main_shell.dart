@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../profile/profile_page.dart';
 import '../../theme/app_colors.dart';
 import 'event_controller.dart';
 import 'home_page.dart';
@@ -46,7 +47,7 @@ class _MainShellState extends State<MainShell> {
         },
       ),
       const _PlaceholderPage(title: 'Club'),
-      const _PlaceholderPage(title: 'Profil'),
+      const ProfilePage(),
       const SettingsPage(),
     ];
 
