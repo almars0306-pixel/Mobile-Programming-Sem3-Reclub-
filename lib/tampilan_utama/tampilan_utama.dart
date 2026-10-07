@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
 import '../theme/app_colors.dart';
+import '../tampilan_club/home_screen.dart';
 import 'login.dart';
 import 'signup.dart';
+
 
 class _OnboardSlide {
   final IconData icon;
@@ -57,20 +59,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
     super.dispose();
   }
 
-  // Melompat ke slide terakhir pas tombol Lewati ditekan
+  // Melompat langsung ke halaman utama aplikasi saat tombol Lewati ditekan
   void _lewati() {
-    _pageController.animateToPage(
-      _slides.length - 1,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOut,
-    );
-  }
-
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => const ClubsHomeScreen(), // ✅ Menggunakan ClubsHomeScreen
+    ),
+  );
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // background gradient biar lebih hidup daripada warna polos
+        // background gradient
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -109,19 +111,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ),
                       ],
                     ),
-                    if (_currentPage < _slides.length - 1)
-                      TextButton(
-                        onPressed: _lewati,
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text(
-                          'Lewati',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                          ),
+                    TextButton(
+                      onPressed: _lewati,
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text(
+                        'Lewati',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
+                    ),
                   ],
                 ),
               ),
@@ -211,7 +212,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ),
               const SizedBox(height: 20),
 
-              // indikator dots: dot aktif jadi kapsul lebar
+              // indikator dots
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(_slides.length, (index) {
