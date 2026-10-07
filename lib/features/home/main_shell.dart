@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../profile/profile_page.dart';
+import '../club/club_page.dart';
 import '../../theme/app_colors.dart';
 import 'event_controller.dart';
 import 'home_page.dart';
@@ -17,16 +18,15 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
-
   void _pindahKeTabEvent() {
     setState(() {
-      _selectedIndex = 1; 
+      _selectedIndex = 1;
     });
   }
 
   void _pindahKeTabClub() {
     setState(() {
-      _selectedIndex = 2; 
+      _selectedIndex = 2;
     });
   }
 
@@ -42,11 +42,10 @@ class _MainShellState extends State<MainShell> {
       EventPage(
         events: eventController.events,
         onEventChanged: (updatedList) {
-
           eventController.setEvents(updatedList);
         },
       ),
-      const _PlaceholderPage(title: 'Club'),
+      const ClubPage(),
       const ProfilePage(),
       const SettingsPage(),
     ];
@@ -94,55 +93,6 @@ class _MainShellState extends State<MainShell> {
             label: 'Pengaturan',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-  const _PlaceholderPage({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 90,
-              height: 90,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primarySoft,
-              ),
-              child: const Icon(
-                Icons.handyman_rounded,
-                size: 40,
-                color: AppColors.primary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Halaman $title',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Sedang dikerjakan teman kamu',
-              style: TextStyle(
-                fontSize: 13.5,
-                color: AppColors.textGrey,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
