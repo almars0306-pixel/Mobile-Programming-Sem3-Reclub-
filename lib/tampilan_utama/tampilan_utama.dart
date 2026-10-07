@@ -5,7 +5,7 @@ import '../theme/app_colors.dart';
 import '../tampilan_club/home_screen.dart';
 import 'login.dart';
 import 'signup.dart';
-import 'tampilan_utama.dart'; // Impor file navigasi utama aplikasi
+
 
 class _OnboardSlide {
   final IconData icon;
