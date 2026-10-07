@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../auth_service.dart';
 import '../theme/app_colors.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../features/home/main_shell.dart';
 
 class LoginPage extends StatefulWidget {
@@ -10,7 +10,6 @@ class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
-
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController =
       TextEditingController();
@@ -188,26 +187,34 @@ class _LoginPageState extends State<LoginPage> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () {
+                   
+                    onPressed: () async {
                       final email = _emailController.text.trim();
                       final password = _passwordController.text;
+                      final navigator = Navigator.of(context);
+                      final messenger = ScaffoldMessenger.maybeOf(context);
 
-                      // Proses login
                       final success = AuthService.instance.login(
                         email: email,
                         password: password,
                       );
 
                       if (success) {
-                        Navigator.pushReplacement(
-                          context,
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('user_email', email);
+
+                        final namaDariEmail = email.split('@')[0];
+                        await prefs.setString('user_name', namaDariEmail);
+
+                        if (!mounted) return;
+                        navigator.pushReplacement(
                           MaterialPageRoute(
                             builder: (context) => const MainShell(),
                           ),
                         );
-
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        if (!mounted) return;
+                        messenger?.showSnackBar(
                           const SnackBar(
                             content: Text(
                               'Email atau kata sandi salah',
