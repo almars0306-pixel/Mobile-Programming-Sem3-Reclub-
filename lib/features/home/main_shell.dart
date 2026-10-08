@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import '../profile/profile_page.dart';
+import '../club/club_page.dart';
+import '../../theme/app_colors.dart';
+import 'event_controller.dart';
 import 'home_page.dart';
+import 'settings_page.dart';
+import 'widgets/event_page.dart';
 
-// Kerangka utama aplikasi setelah login.
-// Isinya bottom navigation bar + halaman sesuai tab yang dipilih.
-// Tab Event, Club, dan Profil masih placeholder, nanti diganti
-// sama halaman punya temen-temen yang lain.
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
@@ -16,80 +18,81 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 0;
 
-  // urutan harus sama dengan urutan item di BottomNavigationBar
-  final List<Widget> _pages = const [
-    HomePage(),
-    _PlaceholderPage(title: 'Event'),
-    _PlaceholderPage(title: 'Club'),
-    _PlaceholderPage(title: 'Profil'),
-  ];
-
-  void _onTabTapped(int index) {
+  void _pindahKeTabEvent() {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = 1;
+    });
+  }
+
+  void _pindahKeTabClub() {
+    setState(() {
+      _selectedIndex = 2;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final eventController = context.watch<EventController>();
+
+    final List<Widget> pages = [
+      HomePage(
+        onOpenEvents: _pindahKeTabEvent,
+        onOpenClub: _pindahKeTabClub,
+      ),
+      EventPage(
+        events: eventController.events,
+        onEventChanged: (updatedList) {
+          eventController.setEvents(updatedList);
+        },
+      ),
+      const ClubPage(),
+      const ProfilePage(),
+      const SettingsPage(),
+    ];
+
     return Scaffold(
-      // IndexedStack biar state tiap tab gak hilang pas pindah tab
       body: IndexedStack(
         index: _selectedIndex,
-        children: _pages,
+        children: pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onTabTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF3B2FE0),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        height: 68,
+        backgroundColor: Colors.white,
+        indicatorColor: AppColors.primarySoft,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            selectedIcon: Icon(Icons.home_rounded),
             label: 'Beranda',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.event_outlined),
-            activeIcon: Icon(Icons.event),
+            selectedIcon: Icon(Icons.event_rounded),
             label: 'Event',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.groups_outlined),
-            activeIcon: Icon(Icons.groups),
+            selectedIcon: Icon(Icons.groups_rounded),
             label: 'Club',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
+            selectedIcon: Icon(Icons.person_rounded),
             label: 'Profil',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings_rounded),
+            label: 'Pengaturan',
+          ),
         ],
-      ),
-    );
-  }
-}
-
-// Halaman sementara buat tab yang belum dibuat
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-
-  const _PlaceholderPage({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: const Color(0xFF3B2FE0),
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
-        child: Text(
-          'Halaman $title belum dibuat',
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
       ),
     );
   }
